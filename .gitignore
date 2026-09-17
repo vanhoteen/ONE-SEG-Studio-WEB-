@@ -1,0 +1,8 @@
+.DS_Store
+*.pyc
+__pycache__/
+.demo-home/
+demo/bars.cs8
+tests/
+demo/metadata.json
+make_demo.py
