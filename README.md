@@ -4,6 +4,14 @@ Browser-based experimental One-Seg transmitter for HackRF One. It runs locally i
 
 The Beta includes a working CH 20 profile, colour bars with audio generated locally in the browser, and local MP4 preparation at 320×240 / 15 fps. Connect a HackRF, prepare a video or load bars, then choose **Transmit**. Loading or preparing content never starts RF.
 
+## Run the Web Beta
+
+Open the published beta directly in Chrome or Edge:
+
+**[ONE SEG Web Lab](https://vanhoteen.github.io/ONE-SEG-Studio-WEB-/)**
+
+The page is static, so it can run from GitHub Pages. Video conversion, signal generation and WebUSB communication remain on the computer that opens it.
+
 ## Run locally
 
 Serve this folder with a local static server and open it at `http://localhost:8000` in Chrome or Edge. The included `serve.py` binds only to localhost.
