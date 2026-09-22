@@ -1,5 +1,7 @@
 # ONE SEG Web Lab — Beta
 
+[🇬🇧 English](README.md) · [🇪🇸 Castellano](README.es.md)
+
 Browser-based experimental One-Seg transmitter for HackRF One. It runs locally in Chrome or Edge: video conversion, MPEG-TS preparation, ISDB-T modulation and WebUSB transmission remain on the user's computer.
 
 The Beta includes a working CH 20 profile, colour bars with audio generated locally in the browser, and local MP4 preparation at 320×240 / 15 fps. Connect a HackRF, prepare a video or load bars, then choose **Transmit**. Loading or preparing content never starts RF.
@@ -17,6 +19,13 @@ The page is static, so it can run from GitHub Pages. Video conversion, signal ge
 Serve this folder with a local static server and open it at `http://localhost:8000` in Chrome or Edge. The included `serve.py` binds only to localhost.
 
 GitHub Pages can host the interface because it is a static site. WebUSB still requires a compatible browser and a physical HackRF connected to the computer that opens the page.
+
+## Native apps for longer video tests
+
+For prepared video tests longer than the Web Beta’s **15-second** limit, use the native editions:
+
+- **[ONE SEG Studio for macOS](https://github.com/vanhoteen/ONE-SEG-Studio-)** — Apple Silicon application with its packaged runtime.
+- **[ONE SEG Studio for Linux — Ubuntu 26.04 amd64 Preview](https://github.com/vanhoteen/ONE-SEG-Studio-for-Linux---Ubuntu-26.04-amd64-Preview)** — experimental Linux beta tested by the author.
 
 ## Current limits
 
