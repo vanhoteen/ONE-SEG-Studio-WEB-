@@ -1,5 +1,5 @@
 export function encodingArgs({duration=15,bitrate=300,audio=true,aspect='4:3'}={}) {
-  if(!Number.isInteger(duration)||duration<1||duration>300)throw Error('Elige entre 1 segundo y 5 minutos.');
+  if(!Number.isInteger(duration)||duration<1||duration>15)throw Error('Elige entre 1 y 15 segundos.');
   if(![80,100,200,300].includes(bitrate))throw Error('Bitrate no admitido.');
   const peak=Math.max(100,bitrate);
   if(!['4:3','16:9'].includes(aspect))throw Error('Formato no admitido.');

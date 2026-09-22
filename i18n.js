@@ -4,22 +4,22 @@ const copy={
   connect:'Conectar HackRF',disconnect:'Desconectar',test:'La señal de prueba',bars:'Cargar barras preparadas',
   barsHelp:'Si solo vas a transmitir barras, pulsa «Cargar barras preparadas» y ve directamente al último paso: Emitir.',
   radio:'Ajustes de radio',video:'Prepara tu MP4',videoIntro:'Convierte un fragmento a 320 × 240 y 15 fps, con audio AAC. El archivo no sale de tu ordenador.',
-  prepare:'Preparar vídeo',cancel:'Cancelar',duration:'La señal I/Q se genera y se envía por bloques: no se reserva toda en memoria. La conversión de entrada sigue limitada por FFmpeg WebAssembly.',
+  prepare:'Preparar vídeo',cancel:'Cancelar',duration:'La señal I/Q ocupa unos 16 MB por segundo. Por eso la prueba limita la emisión a 15 segundos aunque el archivo original puede ser mayor.',
   footer:'WebUSB · Chrome / Edge · Sin servidores de procesamiento. Barras con imagen y audio verificadas por el usuario. Modulador de vídeo contrastado con GNU Radio; recepción del vídeo web pendiente de prueba.',
   emit:'▶ Emitir',stop:'■ Detener',language:'Idioma',badge:'BETA LOCAL',connection:'01 / CONEXIÓN',content:'02 / CONTENIDO',output:'03 / SALIDA',
   barsLabel:'barras con audio',channel:'Canal japonés (UHF)',channels:'Canales físicos 13–52. Los botones 1–12 del televisor son memorias de emisoras.',frequency:'Frecuencia (MHz)',amp:'Amplificador RF',sample:'Muestreo',filter:'Filtro',radioHelp:'El selector cambia la frecuencia RF; no modifica las tablas del archivo I/Q. Las barras incluidas están preparadas para CH 20.',
-  videoStep:'VÍDEO LOCAL / CONVERSIÓN EN EL NAVEGADOR',file:'Seleccionar vídeo',durationLabel:'Fragmento desde el inicio',aspect:'Formato en pantalla',bitrate:'Bitrate de vídeo',notice:'Esta etapa prepara el vídeo y la capa A con las tablas de la aplicación para CH 20. Al pulsar Emitir, la modulación I/Q se produce en una cola continua y se envía al HackRF. La generación no activa el HackRF.',conversionLog:'Registro de conversión',status:'ESTADO',testLog:'Registro de la prueba'
+  videoStep:'VÍDEO LOCAL / CONVERSIÓN EN EL NAVEGADOR',file:'Seleccionar vídeo',durationLabel:'Fragmento desde el inicio',aspect:'Formato en pantalla',bitrate:'Bitrate de vídeo',notice:'Esta etapa prepara el vídeo y la capa A con las tablas de la aplicación para CH 20. Después genera la señal I/Q en tu navegador. Al terminar, pulsa Emitir para realizar la prueba. La generación no activa el HackRF.',conversionLog:'Registro de conversión',status:'ESTADO',testLog:'Registro de la prueba'
  },
  en:{
   tagline:'One signal. One browser.',intro:'USB I/Q playback test. Your files stay on your computer.',
   connect:'Connect HackRF',disconnect:'Disconnect',test:'Test signal',bars:'Load prepared bars',
   barsHelp:'For bars only, choose “Load prepared bars” and go straight to the final step: Transmit.',
   radio:'Radio settings',video:'Prepare your MP4',videoIntro:'Converts a clip to 320 × 240 at 15 fps with AAC audio. The file never leaves your computer.',
-  prepare:'Prepare video',cancel:'Cancel',duration:'I/Q is generated and sent in blocks, so the complete waveform is not kept in memory. Input conversion is still limited by FFmpeg WebAssembly.',
+  prepare:'Prepare video',cancel:'Cancel',duration:'I/Q takes about 16 MB per second. The test therefore limits transmission to 15 seconds, even if the original file is larger.',
   footer:'WebUSB · Chrome / Edge · No processing servers. Bars with video and audio verified by the user. Video modulator compared with GNU Radio; browser-video reception still needs a hardware test.',
   emit:'▶ Transmit',stop:'■ Stop',language:'Language',badge:'LOCAL BETA',connection:'01 / CONNECTION',content:'02 / CONTENT',output:'03 / OUTPUT',
   barsLabel:'bars with audio',channel:'Japanese channel (UHF)',channels:'Physical channels 13–52. TV buttons 1–12 are station memories.',frequency:'Frequency (MHz)',amp:'RF amplifier',sample:'Sample rate',filter:'Filter',radioHelp:'The selector changes RF frequency; it does not modify I/Q tables. Included bars are prepared for CH 20.',
-  videoStep:'LOCAL VIDEO / BROWSER CONVERSION',file:'Select video',durationLabel:'Clip from the beginning',aspect:'Display format',bitrate:'Video bitrate',notice:'This stage prepares the video and layer A using the CH 20 application tables. When you press Transmit, I/Q modulation runs through a continuous queue and goes to HackRF. Preparation never activates HackRF.',conversionLog:'Conversion log',status:'STATUS',testLog:'Test log'
+  videoStep:'LOCAL VIDEO / BROWSER CONVERSION',file:'Select video',durationLabel:'Clip from the beginning',aspect:'Display format',bitrate:'Video bitrate',notice:'This stage prepares the video and layer A using the CH 20 application tables. It then generates I/Q in your browser. When finished, press Transmit for the test. Preparation never activates HackRF.',conversionLog:'Conversion log',status:'STATUS',testLog:'Test log'
  }
 };
 const $=id=>document.getElementById(id);

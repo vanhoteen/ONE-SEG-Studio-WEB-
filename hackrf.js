@@ -36,16 +36,9 @@ export class HackRF {
   async close() { await this.stop(); if(this.device.opened) await this.device.close(); }
   async transmit(bytes,frequency,gain,amp,onProgress=()=>{}) {
     validate(bytes,frequency,gain);
-    return this.transmitStream((async function*(){yield bytes;})(),frequency,gain,amp,onProgress,bytes.length);
-  }
-  async transmitStream(source,frequency,gain,amp,onProgress=()=>{},totalBytes=null) {
-    if(!source||typeof source[Symbol.asyncIterator]!=='function') throw Error('Fuente continua I/Q no válida.');
-    if(!Number.isFinite(frequency)||frequency<1e6||frequency>6e9) throw Error('Frecuencia fuera de rango.');
-    if(!Number.isInteger(gain)||gain<0||gain>47) throw Error('Ganancia fuera de rango.');
     if(this.busy) throw Error('Ya hay una operación de transmisión.');
     this.busy=true;this.active=true;this.sent=0;
-    const iterator=source[Symbol.asyncIterator]();
-    let current=null,offset=0,sourceDone=false;
+    let offset=0;
     const pending=new Set();
     try {
       await this.out(1,0);
@@ -60,30 +53,18 @@ export class HackRF {
       if(!this.active) return;
       await this.out(1,2);
       if(!this.active) return;
-      const nextChunk=async()=>{
-        while(!current||offset>=current.length){
-          const item=await iterator.next();
-          if(item.done){sourceDone=true;return null;}
-          if(!(item.value instanceof Uint8Array)||!item.value.length||item.value.length%2) throw Error('Bloque I/Q continuo inválido.');
-          current=item.value;offset=0;
-        }
-        const end=Math.min(offset+262144,current.length);
-        const chunk=current.subarray(offset,end);offset=end;
-        return chunk;
-      };
-      const send=async()=>{
-        const original=await nextChunk();
-        if(!original) return false;
-        let chunk=original;const useful=chunk.length;
+      const send=()=>{
+        const end=Math.min(offset+262144,bytes.length);
+        let chunk=bytes.subarray(offset,end);const useful=chunk.length;offset=end;
         if(chunk.length%512) { const padded=new Uint8Array(Math.ceil(chunk.length/512)*512);padded.set(chunk);chunk=padded; }
         const p=this.device.transferOut(2,chunk).then(r=>{
           if(r.status!=='ok'||r.bytesWritten!==chunk.length) throw Error('Transferencia USB incompleta.');
-          this.sent+=useful;onProgress(this.sent,totalBytes);
+          this.sent+=useful;onProgress(this.sent,bytes.length);
         });
-        pending.add(p);p.then(()=>pending.delete(p),()=>{});return true;
+        pending.add(p);p.then(()=>pending.delete(p),()=>{});return p;
       };
-      while(this.active&&(!sourceDone||pending.size)) {
-        while(this.active&&!sourceDone&&pending.size<4) await send();
+      while(this.active&&(offset<bytes.length||pending.size)) {
+        while(this.active&&offset<bytes.length&&pending.size<4) send();
         if(pending.size) {
           let timer;
           try { await Promise.race([Promise.race(pending),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('USB sin respuesta durante 3 segundos.')),3000);})]); }
@@ -92,7 +73,6 @@ export class HackRF {
       }
     } finally {
       this.active=false;
-      try { if(iterator.return) await iterator.return(); } catch {}
       try { await this.out(1,0); }
       finally {
         // Closing on stop/error cancels outstanding bulk transfers before reconnecting.
