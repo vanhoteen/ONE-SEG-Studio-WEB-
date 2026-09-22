@@ -1,7 +1,7 @@
 import {HackRF,RATE} from './hackrf.js';
 import {WaveformBuilder} from './waveform.js';
 const $=id=>document.getElementById(id);
-let radio=null,bytes=null,loading=false,running=false,videoBusy=false;
+let radio=null,bytes=null,stream=null,loading=false,running=false,videoBusy=false;
 const barsWaveform=new WaveformBuilder();
 const english=()=>document.documentElement.lang==='en';
 function text(value){
@@ -16,9 +16,10 @@ function refresh(){
   const connected=radio?.device.opened;
   $('connect').disabled=!navigator.usb||running||loading||connected;
   $('disconnect').disabled=!connected||running;
-  $('start').disabled=!connected||!bytes||running||loading||videoBusy;
+  $('start').disabled=!connected||(!bytes&&!stream)||running||loading||videoBusy;
   $('stop').disabled=!running;
-  $('transmitHint').textContent=running?(english()?'Transmission in progress':'Emisión en curso'):videoBusy?(english()?'Wait for preparation to finish':'Espera a que termine la preparación'):loading?(english()?'Loading…':'Cargando…'):!connected?(bytes?(english()?'Signal prepared. Connect HackRF above to enable Transmit.':'Señal preparada. Pulsa «Conectar HackRF» arriba para habilitar Emitir.'):(english()?'Connect HackRF, then prepare a video or load bars.':'Pulsa «Conectar HackRF» y prepara un vídeo o carga las barras.')):!bytes?(english()?'Prepare a video or load bars to enable Transmit.':'Prepara un vídeo o carga las barras para habilitar Emitir.'):(english()?'Everything is ready. Press Transmit when you want to begin.':'Todo preparado. Pulsa Emitir cuando quieras comenzar.');
+  const prepared=bytes||stream;
+  $('transmitHint').textContent=running?(english()?'Transmission in progress':'Emisión en curso'):videoBusy?(english()?'Wait for preparation to finish':'Espera a que termine la preparación'):loading?(english()?'Loading…':'Cargando…'):!connected?(prepared?(english()?'Signal prepared. Connect HackRF above to enable Transmit.':'Señal preparada. Pulsa «Conectar HackRF» arriba para habilitar Emitir.'):(english()?'Connect HackRF, then prepare a video or load bars.':'Pulsa «Conectar HackRF» y prepara un vídeo o carga las barras.')):!prepared?(english()?'Prepare a video or load bars to enable Transmit.':'Prepara un vídeo o carga las barras para habilitar Emitir.'):(english()?'Everything is ready. Press Transmit when you want to begin.':'Todo preparado. Pulsa Emitir cuando quieras comenzar.');
   for(const id of ['demo','channel','frequency','gain','amp']) $(id).disabled=running||loading||videoBusy;
 }
 const compatible=Boolean(navigator.usb&&isSecureContext);
@@ -52,14 +53,14 @@ $('connect').onclick=async()=>{
 };
 $('disconnect').onclick=async()=>{try{await radio.close();radio=null;$('device').textContent='HackRF desconectado';state('RF detenida');}catch(e){state(e.message);}refresh();};
 async function load(source,name){
-  loading=true;bytes=null;refresh();
+  loading=true;bytes=null;stream=null;refresh();
   try{const buffer=await source();if(buffer.byteLength===0||buffer.byteLength%2)throw Error('Se necesita I/Q de 8 bits intercalado (número par de bytes).');
     bytes=new Uint8Array(buffer);$('source').textContent=`${name} · ${(bytes.length/1e6).toFixed(1)} MB · ${(bytes.length/(RATE*2)).toFixed(1)} s`;state('Señal cargada · RF detenida');
   }catch(e){state(`No se pudo cargar: ${e.message}`);}finally{loading=false;refresh();}
 }
 $('demo').onclick=async()=>{
   if(loading||running)return;
-  loading=true;bytes=null;refresh();state('Preparando barras One-Seg · RF detenida');
+  loading=true;bytes=null;stream=null;refresh();state('Preparando barras One-Seg · RF detenida');
   try{
     const response=await fetch('demo/bars-layer-a.ts');
     if(!response.ok)throw Error('No se pudo cargar la fuente de barras.');
@@ -71,11 +72,17 @@ $('demo').onclick=async()=>{
   finally{loading=false;refresh();}
 };
 $('start').onclick=async()=>{
-  if(running||videoBusy||!radio||!bytes)return;
+  if(running||videoBusy||!radio||(!bytes&&!stream))return;
   running=true;refresh();state('Iniciando transmisión…');
-  try{await radio.transmit(bytes,Number($('frequency').value)*1e6,Number($('gain').value),$('amp').checked,(sent,total)=>{
-    $('state').textContent='Transmitiendo';$('progress').textContent=`${(sent/1e6).toFixed(1)} / ${(total/1e6).toFixed(1)} MB enviados por USB`;
-  });state('RF detenida · prueba finalizada');}catch(e){state(`RF detenida / error: ${e.message}`);}
+  try{
+    const report=(sent,total)=>{
+      $('state').textContent='Transmitiendo';
+      $('progress').textContent=total?`${(sent/1e6).toFixed(1)} / ${(total/1e6).toFixed(1)} MB enviados por USB`:`${(sent/1e6).toFixed(1)} MB enviados por USB · señal continua`;
+    };
+    if(stream) await radio.transmitStream(stream.chunks((value,frame,frames)=>{$('progress').textContent=`${Math.round(value*100)}% de modulación · bloque ${frame+1}/${frames}`;}),Number($('frequency').value)*1e6,Number($('gain').value),$('amp').checked,report);
+    else await radio.transmit(bytes,Number($('frequency').value)*1e6,Number($('gain').value),$('amp').checked,report);
+    state('RF detenida · prueba finalizada');
+  }catch(e){state(`RF detenida / error: ${e.message}`);}
   finally{running=false;refresh();}
 };
 $('stop').onclick=async()=>{state('Deteniendo…');try{await radio?.stop();}catch(e){log(e.message);} };
@@ -87,7 +94,7 @@ refresh();
 window.addEventListener('video-busy',event=>{
   videoBusy=event.detail;
   if(videoBusy){
-    bytes=null;
+    bytes=null;stream=null;
     $('source').textContent='Vídeo en preparación · no hay señal I/Q cargada';
     $('progress').textContent='0 MB enviados por USB';
     state('RF detenida · preparando señal del vídeo');
@@ -96,13 +103,13 @@ window.addEventListener('video-busy',event=>{
 });
 window.addEventListener('video-invalidated',()=>{
  if(running)return;
- bytes=null;$('source').textContent='Contenido cambiado · vuelve a preparar el vídeo o cargar las barras';state('RF detenida');refresh();
+ bytes=null;stream=null;$('source').textContent='Contenido cambiado · vuelve a preparar el vídeo o cargar las barras';state('RF detenida');refresh();
 });
-window.addEventListener('video-iq',event=>{
+window.addEventListener('video-stream',event=>{
  if(running)return;
- bytes=event.detail.bytes;
+ bytes=null;stream=event.detail.stream;
  $('channel').value='20';$('frequency').value='515.142857';
- $('source').textContent=`${event.detail.name} · ${(bytes.length/1e6).toFixed(1)} MB · ${(bytes.length/(RATE*2)).toFixed(1)} s`;
+ $('source').textContent=`${event.detail.name} · ${event.detail.seconds.toFixed(1)} s · I/Q continuo (sin reservarlo completo)`;
  state('Vídeo cargado · CH 20 · RF detenida');refresh();
 });
 window.addEventListener('language-changed',()=>{supportText();refresh();});

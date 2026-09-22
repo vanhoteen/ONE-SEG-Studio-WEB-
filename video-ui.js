@@ -1,8 +1,7 @@
 import {VideoConverter} from './video.js';
-import {WaveformBuilder} from './waveform.js';
+import {StreamingWaveform} from './stream-waveform.js';
 const $=id=>document.getElementById(id),converter=new VideoConverter();
 let busy=false,urls=[];
-const waveform=new WaveformBuilder();
 function clearResult(){for(const url of urls)URL.revokeObjectURL(url);urls=[];$('videoPreview').removeAttribute('src');$('videoPreview').load();$('videoResult').hidden=true;}
 function update(){
   const transmitting=$('start').dataset.running==='true';
@@ -12,7 +11,7 @@ function update(){
 }
 for(const id of ['videoFile','clipDuration','videoAspect','videoBitrate'])$(id).addEventListener('change',()=>{clearResult();window.dispatchEvent(new Event('video-invalidated'));$('videoState').textContent='Listo para preparar · no transmite';update();});
 window.addEventListener('radio-state',update);
-$('cancelConvert').onclick=()=>{converter.cancel();waveform.cancel();};
+$('cancelConvert').onclick=()=>{converter.cancel();};
 $('convert').onclick=async()=>{
   if(busy)return;
   busy=true;clearResult();update();window.dispatchEvent(new CustomEvent('video-busy',{detail:true}));
@@ -24,11 +23,11 @@ $('convert').onclick=async()=>{
     const preview=URL.createObjectURL(new Blob([result.preview],{type:'video/mp4'}));
     urls=[preview];
     $('videoPreview').src=preview;$('videoResult').hidden=false;
-    $('videoState').textContent='Generando señal One-Seg en el navegador…';
-    const iq=await waveform.build(result.layerA,value=>{$('videoProgress').value=.45+.55*value;});
-    window.dispatchEvent(new CustomEvent('video-iq',{detail:{bytes:iq,name:$('videoFile').files[0].name}}));
-    $('videoState').textContent=`Señal preparada · ${(iq.length/16000000).toFixed(1)} s · CH 20 · pulsa Emitir para probar`;
-    $('videoLog').textContent+='\nModulación terminada a 8 MS/s. RF detenida. Recepción de este vídeo pendiente de prueba.';
+    const stream=new StreamingWaveform(result.layerA);
+    window.dispatchEvent(new CustomEvent('video-stream',{detail:{stream,name:$('videoFile').files[0].name,seconds:stream.seconds}}));
+    $('videoProgress').value=1;
+    $('videoState').textContent=`Vídeo preparado · ${stream.seconds.toFixed(1)} s · CH 20 · pulsa Emitir para modular y transmitir por bloques`;
+    $('videoLog').textContent+='\nCapa A preparada. La modulación I/Q se producirá por bloques al pulsar Emitir; RF detenida.';
   }catch(error){$('videoState').textContent=error.message;}
   finally{busy=false;update();window.dispatchEvent(new CustomEvent('video-busy',{detail:false}));}
 };
