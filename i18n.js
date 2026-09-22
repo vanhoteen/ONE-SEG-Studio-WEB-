@@ -6,9 +6,9 @@ const copy={
   radio:'Ajustes de radio',video:'Prepara tu MP4',videoIntro:'Convierte un fragmento a 320 × 240 y 15 fps, con audio AAC. El archivo no sale de tu ordenador.',
   prepare:'Preparar vídeo',cancel:'Cancelar',duration:'La señal I/Q ocupa unos 16 MB por segundo. Por eso la prueba limita la emisión a 15 segundos aunque el archivo original puede ser mayor.',
   footer:'WebUSB · Chrome / Edge · Sin servidores de procesamiento. Barras con imagen y audio verificadas por el usuario. Modulador de vídeo contrastado con GNU Radio; recepción del vídeo web pendiente de prueba.',
-  emit:'▶ Emitir',stop:'■ Detener',language:'Idioma',badge:'BETA LOCAL',connection:'01 / CONEXIÓN',content:'02 / CONTENIDO',output:'03 / SALIDA',
+  emit:'▶ Emitir',stop:'■ Detener',language:'Idioma',badge:'BETA LOCAL',connection:'03 / CONEXIÓN Y EMISIÓN',content:'01 / CONTENIDO',output:'02 / SALIDA',
   barsLabel:'barras con audio',channel:'Canal japonés (UHF)',channels:'Canales físicos 13–52. Los botones 1–12 del televisor son memorias de emisoras.',frequency:'Frecuencia (MHz)',amp:'Amplificador RF',sample:'Muestreo',filter:'Filtro',radioHelp:'El selector cambia la frecuencia RF; no modifica las tablas del archivo I/Q. Las barras incluidas están preparadas para CH 20.',
-  videoStep:'VÍDEO LOCAL / CONVERSIÓN EN EL NAVEGADOR',file:'Seleccionar vídeo',durationLabel:'Fragmento desde el inicio',aspect:'Formato en pantalla',bitrate:'Bitrate de vídeo',notice:'Esta etapa prepara el vídeo y la capa A con las tablas de la aplicación para CH 20. Después genera la señal I/Q en tu navegador. Al terminar, pulsa Emitir para realizar la prueba. La generación no activa el HackRF.',conversionLog:'Registro de conversión',status:'ESTADO',testLog:'Registro de la prueba'
+  videoStep:'VÍDEO LOCAL / CONVERSIÓN EN EL NAVEGADOR',file:'Seleccionar vídeo',durationLabel:'Fragmento desde el inicio',aspect:'Formato en pantalla',bitrate:'Bitrate de vídeo',notice:'Esta etapa prepara el vídeo y la capa A con las tablas de la aplicación para CH 20. Después genera la señal I/Q en tu navegador. Al terminar, pulsa Emitir para realizar la prueba. La generación no activa el HackRF.',firmwareHelp:'Cuando aparezca una versión de firmware, por ejemplo 2024.02.1, el navegador ha abierto correctamente el HackRF.',conversionLog:'Registro de conversión',status:'ESTADO',testLog:'Registro de la prueba'
  },
  en:{
   tagline:'One signal. One browser.',intro:'USB I/Q playback test. Your files stay on your computer.',
@@ -17,9 +17,9 @@ const copy={
   radio:'Radio settings',video:'Prepare your MP4',videoIntro:'Converts a clip to 320 × 240 at 15 fps with AAC audio. The file never leaves your computer.',
   prepare:'Prepare video',cancel:'Cancel',duration:'I/Q takes about 16 MB per second. The test therefore limits transmission to 15 seconds, even if the original file is larger.',
   footer:'WebUSB · Chrome / Edge · No processing servers. Bars with video and audio verified by the user. Video modulator compared with GNU Radio; browser-video reception still needs a hardware test.',
-  emit:'▶ Transmit',stop:'■ Stop',language:'Language',badge:'LOCAL BETA',connection:'01 / CONNECTION',content:'02 / CONTENT',output:'03 / OUTPUT',
+  emit:'▶ Transmit',stop:'■ Stop',language:'Language',badge:'LOCAL BETA',connection:'03 / CONNECT AND TRANSMIT',content:'01 / CONTENT',output:'02 / OUTPUT',
   barsLabel:'bars with audio',channel:'Japanese channel (UHF)',channels:'Physical channels 13–52. TV buttons 1–12 are station memories.',frequency:'Frequency (MHz)',amp:'RF amplifier',sample:'Sample rate',filter:'Filter',radioHelp:'The selector changes RF frequency; it does not modify I/Q tables. Included bars are prepared for CH 20.',
-  videoStep:'LOCAL VIDEO / BROWSER CONVERSION',file:'Select video',durationLabel:'Clip from the beginning',aspect:'Display format',bitrate:'Video bitrate',notice:'This stage prepares the video and layer A using the CH 20 application tables. It then generates I/Q in your browser. When finished, press Transmit for the test. Preparation never activates HackRF.',conversionLog:'Conversion log',status:'STATUS',testLog:'Test log'
+  videoStep:'LOCAL VIDEO / BROWSER CONVERSION',file:'Select video',durationLabel:'Clip from the beginning',aspect:'Display format',bitrate:'Video bitrate',notice:'This stage prepares the video and layer A using the CH 20 application tables. It then generates I/Q in your browser. When finished, press Transmit for the test. Preparation never activates HackRF.',firmwareHelp:'When a firmware version appears, for example 2024.02.1, the browser has opened HackRF successfully.',conversionLog:'Conversion log',status:'STATUS',testLog:'Test log'
  }
 };
 const $=id=>document.getElementById(id);
@@ -33,7 +33,7 @@ export function applyLanguage(language){
  $('barsLabel').textContent=t.barsLabel;$('channelLabel').firstChild.textContent=t.channel;$('channelsHelp').textContent=t.channels;$('frequencyLabel').firstChild.textContent=t.frequency;
  $('ampLabel').textContent=t.amp;$('sampleLabel').textContent=t.sample;$('filterLabel').textContent=t.filter;$('radioHelp').textContent=t.radioHelp;
  $('videoStep').textContent=t.videoStep;$('fileLabel').firstChild.textContent=t.file;$('durationLabel').firstChild.textContent=t.durationLabel;$('aspectLabel').firstChild.textContent=t.aspect;$('bitrateLabel').firstChild.textContent=t.bitrate;
- $('videoNotice').textContent=t.notice;$('conversionLog').textContent=t.conversionLog;$('statusLabel').textContent=t.status;$('testLog').textContent=t.testLog;
+ $('videoNotice').textContent=t.notice;$('firmwareHelp').textContent=t.firmwareHelp;$('conversionLog').textContent=t.conversionLog;$('statusLabel').textContent=t.status;$('testLog').textContent=t.testLog;
  const format=$('videoAspect');format.options[0].textContent=language==='en'?'4:3 · full picture':'4:3 · imagen completa';format.options[1].textContent=language==='en'?'16:9 · crop to fill':'16:9 · recortado para llenar';
  if($('state').textContent==='RF detenida'||$('state').textContent==='RF stopped')$('state').textContent=language==='en'?'RF stopped':'RF detenida';
  document.querySelector('.language').firstChild.textContent=t.language+' ';
